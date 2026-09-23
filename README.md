@@ -6,7 +6,7 @@ AI Capsule is a private prompt library. A user signs in with GitHub, and the Exp
 
 | | |
 |---|---|
-| **Deployed URL** | `https://YOUR-APP.onrender.com` ← **replace with your Render URL** |
+| **Deployed URL** | https://ai-capsule-nushal.onrender.com |
 | **Cloud platform** | Render: Web Service (Node runtime, Free instance) |
 | **Frontend** | React 19 + Vite + React Router |
 | **Backend** | Node.js + Express 5 |
@@ -94,8 +94,8 @@ Optional hot-reload mode: run `npm run dev` (Express with `--watch`) and `npm ru
    | Health Check Path | `/api/health` |
 
 3. Create a GitHub OAuth App (GitHub → Settings → Developer settings → OAuth Apps):
-   - Homepage URL: `https://YOUR-APP.onrender.com`
-   - Authorization callback URL: `https://YOUR-APP.onrender.com/api/auth/github/callback`
+   - Homepage URL: `https://ai-capsule-nushal.onrender.com`
+   - Authorization callback URL: `https://ai-capsule-nushal.onrender.com/api/auth/github/callback`
 4. Add the environment variables in Render → **Environment** (listed in section 6). Saving them redeploys the service.
 
 Because React is served by the same Express app, the browser only talks to one origin. That means there is no CORS configuration, and the `token` cookie can stay `SameSite=Lax`.
@@ -159,7 +159,7 @@ router.delete('/:id', requireAuth, ...);
 | `JWT_SECRET` | Signs and verifies the application JWT. The server refuses to start if it is missing or shorter than 32 characters |
 | `GITHUB_CLIENT_ID` | GitHub OAuth App client ID |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret (used only server-side) |
-| `GITHUB_CALLBACK_URL` | `https://YOUR-APP.onrender.com/api/auth/github/callback`. Must exactly match the OAuth App |
+| `GITHUB_CALLBACK_URL` | `https://ai-capsule-nushal.onrender.com/api/auth/github/callback`. Must exactly match the OAuth App |
 | `NODE_ENV` | `production` on Render |
 | `PORT` | Set automatically by Render (defaults to 3000 locally) |
 | `DB_PATH` | Optional path to the SQLite file (default `./data/capsules.db`) |
@@ -187,27 +187,35 @@ Locally these go in `.env`, which is git-ignored and loaded with Node's built-in
 
 On Windows PowerShell, type `curl.exe`, not `curl`. `curl` is an alias for `Invoke-WebRequest` there.
 
-```bash
+```powershell
 # Test 1 - no authentication
-curl -i https://YOUR-APP.onrender.com/api/capsules
+curl.exe -i https://ai-capsule-nushal.onrender.com/api/capsules
 
 # Test 2 - fake / invalid JWT
-curl -i -H "Cookie: token=fake-token-123" https://YOUR-APP.onrender.com/api/capsules
+curl.exe -i -H "Cookie: token=fake-token-123" https://ai-capsule-nushal.onrender.com/api/capsules
 ```
 
-**Results obtained:** ← **paste your real output here after deploying**
+**Results obtained** (run on 23 September 2026 against the deployed service; headers trimmed):
 
 ```
-Test 1:
+Test 1 - no authentication
 HTTP/1.1 401 Unauthorized
+Date: Wed, 23 Sep 2026 03:09:15 GMT
+Content-Type: application/json; charset=utf-8
+x-render-origin-server: Render
 ...
 {"error":"Unauthorized","message":"Authentication required. Please log in."}
 
-Test 2:
+Test 2 - fake / invalid JWT (token=fake-token-123)
 HTTP/1.1 401 Unauthorized
+Date: Wed, 23 Sep 2026 03:10:41 GMT
+Content-Type: application/json; charset=utf-8
+x-render-origin-server: Render
 ...
 {"error":"Unauthorized","message":"Invalid or expired token. Please log in again."}
 ```
+
+Test 1 shows the API requires authentication. Test 2 shows the backend actually verifies the JWT signature rather than only checking that a cookie exists: a cookie named `token` is present, but its value is not a valid JWT, so the request is still rejected. Neither response contains any capsule data.
 
 `GET /api/health` returns `{"status":"ok"}`.
 
@@ -238,15 +246,12 @@ Manual verification on the deployed site: GitHub login → dashboard; create, re
 
 ## 11. AI-assisted development statement
 
-> ✏️ **Rewrite this section in your own words before submitting.** Keep what is true, change what isn't, and add the problem you actually hit while deploying.
+> ✏️ Read this through and adjust anything that doesn't match what you did — you need to be able to explain it.
 
-- **AI tool used:** Claude (Anthropic), in Claude Cowork.
-- **What it helped with:** generating the initial project structure, the Express routes and JWT middleware, the React components and CSS, the automated tests, and drafting this README.
-- **What I did myself:** *[e.g. created the GitHub OAuth App and Render web service, configured the environment variables, deployed and debugged the live site, ran the cURL tests, tested CRUD with my GitHub account, recorded the video, reviewed and edited the code and README]*.
-- **A problem found and corrected in AI-generated code/config:** *[describe one real problem. Examples of the kind of thing to write about: the first `npm test` script used `node --test tests/`, which failed on Node 22 with `MODULE_NOT_FOUND` because the test runner treated the folder as a file; it was changed to `node --test tests/api.test.js`. Or a deployment problem you hit, such as GitHub showing "redirect_uri is not associated with this application" until `GITHUB_CALLBACK_URL` exactly matched the OAuth App's callback URL.]*
-- **How OAuth, JWT verification and protected API behaviour were verified:** the two cURL tests against the deployed URL (both 401), a real GitHub login on the deployed site that led to the dashboard, a check that `document.cookie` does not expose `token`, and the automated tests in section 9.
-- **How CRUD and data ownership were verified:** creating, editing and deleting records in the deployed dashboard and reloading to confirm each change came back from `GET /api/capsules`, plus the automated test showing a second user gets 404 on another user's record and cannot see it in their list.
-- **An implementation/deployment decision I can explain:** *[pick one and explain it in your own words, for example:]*
-  - *Serving the React build from Express on one Render service.* The browser only ever talks to one origin, so there is no CORS setup, the `token` cookie can be `SameSite=Lax`, and there is only one URL to deploy and test.
-  - *Using Node's built-in `node:sqlite` instead of `better-sqlite3`.* It needs no native compilation (I hit a native build error with better-sqlite3 on Windows in Assessment 2), it is the same module used in the Week 1 lab, and it builds cleanly on Render.
-  - *Returning 404 instead of 403 for another user's record,* so the API does not reveal which record IDs exist.
+- **AI tool used:** Claude (Anthropic).
+- **What it helped with:** generating the project structure, the Express routes and JWT middleware, the React components and CSS, the automated tests, and drafting this README.
+- **What I did myself:** created the GitHub repository and pushed the code; created the Render web service and chose its build command, start command, instance type and health check path; registered the GitHub OAuth App and set its homepage and callback URLs; generated and configured all environment variables in Render; deployed and debugged the live service; ran the two cURL tests against the deployed URL; signed in with my GitHub account and tested the full CRUD cycle on the deployed dashboard; and reviewed the code and README.
+- **A problem found and corrected in AI-generated code/configuration:** after the first successful deploy, clicking "Continue with GitHub" returned "GitHub OAuth is not configured. Set GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET and GITHUB_CALLBACK_URL." The deployment instructions had me create the Render service before the GitHub OAuth App, so only `NODE_ENV` and `JWT_SECRET` had been set. The application deliberately fails with that message instead of redirecting to GitHub with an empty `client_id`. I fixed it by registering the OAuth App with the callback URL `https://ai-capsule-nushal.onrender.com/api/auth/github/callback`, adding `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `GITHUB_CALLBACK_URL` in Render → Environment, and redeploying. The callback URL has to match the OAuth App exactly, or GitHub rejects the login with "redirect_uri is not associated with this application".
+- **How OAuth login, JWT verification and protected API behaviour were verified:** the two cURL tests in section 8 both returned 401 against the deployed URL — the second proves the signature is actually verified, because a cookie named `token` is present but invalid. I then completed a real GitHub login on the deployed site and reached the protected dashboard, and confirmed in the browser console that `document.cookie` does not contain the token, because it is HttpOnly. `npm test` runs 14 automated tests covering the same behaviour, including a JWT signed with a different secret, an expired JWT, and a token sent as an `Authorization: Bearer` header instead of the cookie.
+- **How CRUD behaviour and user data ownership were verified:** I created, edited and deleted capsules on the deployed dashboard and reloaded the page each time, so the list came back from `GET /api/capsules` rather than from browser state. Ownership is enforced server-side: `user_id` comes from the verified JWT and every SQL statement filters by it, so an update or delete of another user's record changes 0 rows and returns 404. The automated tests cover this with two different users.
+- **An implementation/deployment decision I can explain:** serving the built React app from the same Express service on one Render URL, instead of deploying the frontend and backend separately. Because the browser only talks to one origin, there is no CORS configuration and the `token` cookie can stay `SameSite=Lax` rather than needing `SameSite=None` for cross-site requests, which also keeps it protected against cross-site request forgery. It also means one build command, one deploy and one URL to test. The trade-off is that the frontend and backend cannot be scaled or redeployed independently, which does not matter at this size.
