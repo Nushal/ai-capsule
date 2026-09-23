@@ -1,0 +1,28 @@
+{
+  "name": "ai-capsule",
+  "version": "1.0.0",
+  "description": "AI Capsule - a cloud-deployed AI prompt manager (React + Express + SQLite + GitHub OAuth + JWT)",
+  "private": true,
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "dev": "node --watch --disable-warning=ExperimentalWarning server/index.js",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix client install --include=dev && npm --prefix client run build",
+    "test": "node --disable-warning=ExperimentalWarning --test tests/api.test.js"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
+}
